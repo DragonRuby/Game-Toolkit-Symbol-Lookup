@@ -1,3 +1,6 @@
+# Copyright 2019, DragonRuby LLC. All rights reserved.
+# http://dragonruby.org
+
 module GTK
   class Console
     attr_accessor :show_reason, :log, :prompt, :logo, :background_color,
