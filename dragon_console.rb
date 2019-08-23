@@ -1,3 +1,8 @@
+# Copyright 2019 DragonRuby LLC
+
+# dragon_console.rb has been released under MIT (*only this file*). See exclusion list in license.txt for all files released
+# under a permissive license.
+
 module GTK
   class Console
     attr_accessor :show_reason, :log, :prompt, :logo, :background_color,
