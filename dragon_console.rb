@@ -1,12 +1,9 @@
-# Copyright 2019, DragonRuby LLC. All rights reserved.
-# http://dragonruby.org
-
 module GTK
   class Console
     attr_accessor :show_reason, :log, :prompt, :logo, :background_color,
                   :text_color, :cursor_color, :font, :animation_duration,
                   :max_log_lines, :max_history, :current_input_str, :log,
-                  :last_command_errored, :last_command
+                  :last_command_errored, :last_command, :error_color
 
     def initialize
       @disabled = false
@@ -25,6 +22,7 @@ module GTK
       @history_fname = 'console_history.txt'
       @background_color = [ 0, 0, 0, 224 ]
       @text_color = [ 255, 255, 255, 255 ]
+      @error_color = [ 200, 50, 50, 255]
       @cursor_color = [ 187, 21, 6, 255 ]
       @font = 'font.ttf'
       @animation_duration = 1.seconds
@@ -104,6 +102,10 @@ module GTK
       end
     end
 
+    def close
+      hide
+    end
+
     def clear_toast
       @toasted_at = nil
       @toast_duration = 0
@@ -175,8 +177,11 @@ S
     end
 
     def console_toggle_key_down? args
+      return false if args.inputs.keyboard.alt
       return args.inputs.keyboard.key_down.backtick! ||
-             args.inputs.keyboard.key_down.superscript_two!
+             args.inputs.keyboard.key_down.superscript_two! ||
+             args.inputs.keyboard.key_down.section_sign! ||
+             args.inputs.keyboard.key_down.ordinal_indicator!
     end
 
     def process_inputs args
@@ -256,7 +261,7 @@ S
         @current_input_str.clear
         @command_history_index = -1
         @nonhistory_input = ''
-      elsif args.inputs.keyboard.key_down.backspace
+      elsif args.inputs.keyboard.key_down.backspace || args.inputs.keyboard.key_down.delete
         @current_input_str.chop!
       end
 
@@ -286,6 +291,7 @@ S
       logo_y = y
 
       txtinfo = [ @text_color[0], @text_color[1], @text_color[2], (@text_color[3].to_f * percent).to_i, @font ]
+      errorinfo = [ @error_color[0], @error_color[1], @error_color[2], (@error_color[3].to_f * percent).to_i, @font ]
       cursorinfo = [ @cursor_color[0], @cursor_color[1], @cursor_color[2], (@cursor_color[3].to_f  * percent).to_i, @font ]
 
       y += 2  # just give us a little padding at the bottom.
@@ -299,11 +305,23 @@ S
       y += h  # !!! FIXME: remove this when we fix coordinate origin on labels.
 
       ((@log.size - @log_offset) - 1).downto(0) do |idx|
-        str = @log[idx]
-        args.outputs.reserved << [left + 10, y, str, 1, 0, *txtinfo].label
+        str = @log[idx] || ""
+        if include_error_marker? str
+          args.outputs.reserved << [left + 10, y, str, 1, 0, *errorinfo].label
+        else
+          args.outputs.reserved << [left + 10, y, str, 1, 0, *txtinfo].label
+        end
         y += h
         break if y > top
       end
+    end
+
+    def include_error_marker? text
+      error_markers.any? { |e| text.downcase.include? e }
+    end
+
+    def error_markers
+      ["exception:", "error:", "undefined method", "failed", "syntax"]
     end
 
     def calc args
@@ -318,7 +336,7 @@ S
         hide
       end
 
-      if $gtk.root.files_reloaded.length > 0
+      if $gtk.files_reloaded.length > 0
         clear_toast
         @toast_ids.clear
       end
