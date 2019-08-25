@@ -1,7 +1,31 @@
 # Copyright 2019 DragonRuby LLC
 
-# dragon_console.rb has been released under MIT (*only this file*). See exclusion list in license.txt for all files released
-# under a permissive license.
+# dragon_console.rb has been released under MIT (*only this file*).
+# See exclusion list in license.txt for all files released # under a permissive license.
+
+=begin
+# How to Include This File In Your Own Project
+
+1. Create a file under ./mygame called console.rb.
+2. Open ./mygame/main.rb and add the following line at the top of
+   the file:
+
+```ruby
+require 'app/console.rb'
+```
+
+3. After saving main.rb, you should see the following notification
+   in the terminal:
+
+```dragonruby-console
+* INFO: Reloaded app/console.rb. (timestamp)
+* INFO: Reloaded app/main.rb. (timestamp)
+```
+
+4. With this in place you should be able to change the code below.
+   The object is available via args.gtk.console (or $gtk.console).
+
+=end
 
 module GTK
   class Console
