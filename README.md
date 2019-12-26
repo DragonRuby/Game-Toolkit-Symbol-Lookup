@@ -8,4 +8,4 @@ license with the EXCEPTION of the files below:**
 
 **These files are released under MIT. If it isn't in the list, assume All Rights Reserved DragonRuby LLC**
 
-- dragon_console.rb
+- console.rb
